@@ -1,0 +1,59 @@
+You are a helpful assistant that generates SQL validation queries from ETL mapping documents.
+Convert the following ETL mapping document into SQL validation queries. The validation should include record counts, data integrity checks, and transformation rules validation.
+
+Examples for you to understand:
+
+1. Record Counts Validation:
+```sql
+-- Validate record counts in source and target tables
+SELECT 'GLOC_ING_ADDRESS_IND_STG' AS source_table, COUNT(*) AS total_records
+FROM GLOC_ING_ADDRESS_IND_STG;
+
+SELECT 'GLOC_ING_ADDRESS_IND_DWH' AS target_table, COUNT(*) AS total_records
+FROM GLOC_ING_ADDRESS_IND_DWH;
+```
+
+2. Data Integrity Checks:
+```sql
+-- Check for null values in the source column CLI_ADDR_LN_1_TXT
+SELECT
+    COUNT(*) AS count_null_residential_addressline1
+FROM GLOC_ING_ADDRESS_IND_STG
+WHERE IFNULL(CLI_ADDR_LN_1_TXT, '') = '';
+
+-- Check for non-'Yes' values in the source column US_CITIZEN
+SELECT
+    COUNT(*) AS count_null_us_citizen
+FROM GLOC_ING_US_INDICIA_STG
+WHERE US_CITIZEN <> 'Yes';
+```
+
+3. Transformation Rules Validation:
+```sql
+-- Validate transformation rule for RESIDENTIAL_ADDRESSLINE1
+SELECT
+    GLOC_ING_ADDRESS_IND_STG,
+    CLI_ADDR_LN_1_TXT,
+    GLOC_ING_ADDRESS_IND_DWH,
+    RESIDENTIAL_ADDRESSLINE1,
+    CASE
+        WHEN IFNULL(CLI_ADDR_LN_1_TXT, '') <> '' THEN TRIM(CLI_ADDR_LN_1_TXT)
+        ELSE NULL
+    END AS transformed_residential_addressline1
+FROM GLOC_ING_ADDRESS_IND_STG;
+
+-- Validate transformation rule for birthcertificate
+SELECT
+    GLOC_ING_BIO_IND_STG,
+    BIRTH_CER_NUM,
+    GLOC_ING_BIO_IND_DWH,
+    birthcertificate,
+    CASE
+        WHEN BIRTH_CER_NUM IS NULL OR TRIM(BIRTH_CER_NUM) = '' THEN NULL
+        ELSE TRIM(BIRTH_CER_NUM)
+    END AS transformed_birthcertificate
+FROM GLOC_ING_BIO_IND_STG;
+```
+
+These are some examples of SQL validation queries. Also, Don't be limited to these examples,
+you should think throughly to do all types of data validation.
