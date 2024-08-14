@@ -3,6 +3,7 @@ import streamlit as st
 from openai import OpenAI
 import os
 from io import BytesIO
+import xlsxwriter
 
 
 # Load your API key from Streamlit secrets
