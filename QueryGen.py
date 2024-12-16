@@ -80,18 +80,22 @@ else:
 
 excel_file.seek(0)  # Reset the file pointer to the beginning
 
-            
-            # Convert DataFrame to Excel in memory
-            excel_file = BytesIO()
-            with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
-                sql_df.to_excel(writer, index=False, sheet_name='Validation SQL')
-                writer.save()
-                excel_file.seek(0)
-            
-            # Provide download button
-            st.download_button(
-                label="Download Validation SQL as Excel",
-                data=excel_file,
-                file_name="validation_sql.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      # Prepare DataFrame for exporting to Excel
+sql_df = pd.DataFrame({"Generated SQL": [validation_sql]})
+
+# Convert DataFrame to Excel in memory
+excel_file = BytesIO()
+with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
+    sql_df.to_excel(writer, index=False, sheet_name='Validation SQL')  # Indented properly
+
+excel_file.seek(0)  # Reset the file pointer to the beginning
+
+# Provide download button
+st.download_button(
+    label="Download Validation SQL as Excel",
+    data=excel_file,
+    file_name="validation_sql.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
             )
