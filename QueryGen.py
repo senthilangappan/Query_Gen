@@ -97,5 +97,3 @@ st.download_button(
     file_name="validation_sql.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
-            )
