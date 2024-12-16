@@ -70,25 +70,15 @@ else:
             st.subheader("Generated Validation SQL")
             st.code(validation_sql, language="sql")
             
-            # Prepare DataFrame for exporting to Excel
-            sql_df = pd.DataFrame({"Generated SQL": [validation_sql]})
-            # Convert DataFrame to Excel in memory
-            excel_file = BytesIO()
-            with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
-            sql_df.to_excel(writer, index=False, sheet_name='Validation SQL')
-            # No need to call writer.save(); the context manager handles it automatically
-
-excel_file.seek(0)  # Reset the file pointer to the beginning
-
-      # Prepare DataFrame for exporting to Excel
+           # Prepare DataFrame for exporting to Excel
 sql_df = pd.DataFrame({"Generated SQL": [validation_sql]})
 
 # Convert DataFrame to Excel in memory
 excel_file = BytesIO()
-with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
-    sql_df.to_excel(writer, index=False, sheet_name='Validation SQL')  # Indented properly
+with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:  # Ensure proper indentation
+    sql_df.to_excel(writer, index=False, sheet_name='Validation SQL')  # Inside 'with' block
 
-excel_file.seek(0)  # Reset the file pointer to the beginning
+excel_file.seek(0)  # Reset the file pointer (outside 'with')
 
 # Provide download button
 st.download_button(
