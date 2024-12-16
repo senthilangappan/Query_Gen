@@ -72,6 +72,14 @@ else:
             
             # Prepare DataFrame for exporting to Excel
             sql_df = pd.DataFrame({"Generated SQL": [validation_sql]})
+            # Convert DataFrame to Excel in memory
+            excel_file = BytesIO()
+            with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
+            sql_df.to_excel(writer, index=False, sheet_name='Validation SQL')
+            # No need to call writer.save(); the context manager handles it automatically
+
+excel_file.seek(0)  # Reset the file pointer to the beginning
+
             
             # Convert DataFrame to Excel in memory
             excel_file = BytesIO()
