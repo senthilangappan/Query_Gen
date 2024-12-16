@@ -45,7 +45,7 @@ else:
         )
         return response.choices[0].message.content.strip()
 
-    # Streamlit UI 
+    # Streamlit UI
     st.title("ETL Mapping to Validation SQL Converter")
 
     st.write("Upload your ETL mapping Excel document below:")
@@ -53,53 +53,46 @@ else:
     uploaded_file = st.file_uploader("Choose a file", type="xlsx")
 
     if uploaded_file is not None:
-        etl_mapping_df = read_etl_mapping(uploaded_file)
-        prompt_template_path = os.path.join(os.path.dirname(__file__), 'prompt_template.txt')
-        prompt_template = read_prompt_template(prompt_template_path)
-        
-        st.write("ETL Mapping Document:")
-        st.dataframe(etl_mapping_df)
+        try:
+            etl_mapping_df = read_etl_mapping(uploaded_file)
+            prompt_template_path = os.path.join(os.path.dirname(__file__), 'prompt_template.txt')
+            prompt_template = read_prompt_template(prompt_template_path)
+
+            st.write("ETL Mapping Document:")
+            st.dataframe(etl_mapping_df)
+        except Exception as e:
+            st.error(f"Error reading uploaded file: {e}")
 
     if st.button("Generate Validation SQL"):
         with st.spinner("Generating SQL..."):
-            prompt_template_path = os.path.join(os.path.dirname(__file__), 'prompt_template.txt')
-            prompt_template = read_prompt_template(prompt_template_path)
-            etl_mapping_content = construct_prompt(etl_mapping_df, prompt_template)
-            validation_sql = generate_validation_sql(prompt_template, etl_mapping_content)
-            
-            st.subheader("Generated Validation SQL")
-            st.code(validation_sql, language="sql")
-            
-    if st.button("Generate Validation SQL"):
-    with st.spinner("Generating SQL..."):
-        try:
-            # Check if etl_mapping_df is defined and valid
-            if 'etl_mapping_df' not in locals() or etl_mapping_df.empty:
-                st.error("ETL Mapping data is not loaded or is empty.")
-            else:
-                prompt_template_path = os.path.join(os.path.dirname(__file__), 'prompt_template.txt')
-                prompt_template = read_prompt_template(prompt_template_path)
-                etl_mapping_content = construct_prompt(etl_mapping_df, prompt_template)
-                validation_sql = generate_validation_sql(prompt_template, etl_mapping_content)
-                
-                st.subheader("Generated Validation SQL")
-                st.code(validation_sql, language="sql")
-                
-                # Prepare DataFrame for exporting to Excel
-                sql_df = pd.DataFrame({"Generated SQL": [validation_sql]})
-                
-                # Convert DataFrame to Excel in memory
-                excel_file = BytesIO()
-                with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
-                    sql_df.to_excel(writer, index=False, sheet_name='Validation SQL')
-                excel_file.seek(0)
-                
-                # Provide download button
-                st.download_button(
-                    label="Download Validation SQL as Excel",
-                    data=excel_file,
-                    file_name="validation_sql.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+            try:
+                # Check if etl_mapping_df is defined and valid
+                if 'etl_mapping_df' not in locals() or etl_mapping_df.empty:
+                    st.error("ETL Mapping data is not loaded or is empty.")
+                else:
+                    # Construct prompt and generate validation SQL
+                    etl_mapping_content = construct_prompt(etl_mapping_df, prompt_template)
+                    validation_sql = generate_validation_sql(prompt_template, etl_mapping_content)
+
+                    # Display the generated SQL
+                    st.subheader("Generated Validation SQL")
+                    st.code(validation_sql, language="sql")
+
+                    # Prepare DataFrame for exporting to Excel
+                    sql_df = pd.DataFrame({"Generated SQL": [validation_sql]})
+
+                    # Convert DataFrame to Excel in memory
+                    excel_file = BytesIO()
+                    with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
+                        sql_df.to_excel(writer, index=False, sheet_name='Validation SQL')
+                    excel_file.seek(0)
+
+                    # Provide download button
+                    st.download_button(
+                        label="Download Validation SQL as Excel",
+                        data=excel_file,
+                        file_name="validation_sql.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+            except Exception as e:
+                st.error(f"An error occurred during SQL generation: {e}")
